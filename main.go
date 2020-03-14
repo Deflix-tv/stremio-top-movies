@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"strings"
 	"syscall"
 	"time"
@@ -25,7 +26,9 @@ const (
 )
 
 var (
-	dataDir = flag.String("dataDir", ".", "Location of the data directory. It contains CSV files with IMDb IDs and a \"metas\" subdirectory with meta JSON files")
+	bindAddr = flag.String("bindAddr", "localhost", `Local interface address to bind to. "localhost" only allows access from the local host. "0.0.0.0" binds to all network interfaces.`)
+	port     = flag.Int("port", 8080, "Port to listen on")
+	dataDir  = flag.String("dataDir", ".", "Location of the data directory. It contains CSV files with IMDb IDs and a \"metas\" subdirectory with meta JSON files")
 )
 
 var (
@@ -80,7 +83,6 @@ var (
 )
 
 const (
-	addr        = "localhost:8080"
 	redirectURL = "https://www.deflix.tv"
 )
 
@@ -135,6 +137,7 @@ func main() {
 	// Root redirects to website
 	s.HandleFunc("/", rootHandler)
 
+	addr := *bindAddr + ":" + strconv.Itoa(*port)
 	srv := &http.Server{
 		Addr:    addr,
 		Handler: s,
