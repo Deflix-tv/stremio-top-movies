@@ -18,7 +18,7 @@ import (
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 
-	"github.com/doingodswork/deflix-stremio/pkg/stremio"
+	"github.com/doingodswork/stremio-top-movies/pkg/stremio"
 )
 
 const (
