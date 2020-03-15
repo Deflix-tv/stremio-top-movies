@@ -2,10 +2,10 @@ package main
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
+	log "github.com/sirupsen/logrus"
 )
 
 // The example code had this, but apparently it's not required and not used anywhere
@@ -17,27 +17,27 @@ import (
 // }
 
 func healthHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("healthHandler called")
+	log.Trace("healthHandler called")
 
 	if _, err := w.Write([]byte("OK")); err != nil {
-		log.Printf("Coldn't write response: %v\n", err)
+		log.Errorf("Coldn't write response: %v\n", err)
 	}
 }
 
 func manifestHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("manifestHandler called")
+	log.Trace("manifestHandler called")
 
 	resBody, _ := json.Marshal(manifest)
 
-	log.Printf("Responding with: %s\n", resBody)
+	log.Debugf("Responding with: %s\n", resBody)
 	w.Header().Set("Content-Type", "application/json")
 	if _, err := w.Write(resBody); err != nil {
-		log.Printf("Coldn't write response: %v\n", err)
+		log.Errorf("Coldn't write response: %v\n", err)
 	}
 }
 
 func catalogHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("catalogHandler called")
+	log.Trace("catalogHandler called")
 
 	params := mux.Vars(r)
 	requestedType := params["type"]
@@ -68,17 +68,17 @@ func catalogHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Printf("Responding with: %s\n", catalogResponse)
+	log.Debugf("Responding with: %s\n", catalogResponse)
 	w.Header().Set("Content-Type", "application/json")
 	if _, err := w.Write(catalogResponse); err != nil {
-		log.Println("Coldn't write response:", err)
+		log.Errorf("Coldn't write response: %v\n", err)
 	}
 }
 
 func rootHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("rootHandler called")
+	log.Trace("rootHandler called")
 
-	log.Printf("Responding with redirect to %v\n", redirectURL)
+	log.Debugf("Responding with redirect to %v\n", redirectURL)
 	w.Header().Set("Location", redirectURL)
 	w.WriteHeader(http.StatusMovedPermanently)
 }

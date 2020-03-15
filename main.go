@@ -6,7 +6,6 @@ import (
 	"encoding/csv"
 	"flag"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -17,6 +16,7 @@ import (
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/doingodswork/stremio-top-movies/pkg/stremio"
 )
@@ -29,6 +29,7 @@ var (
 	bindAddr = flag.String("bindAddr", "localhost", `Local interface address to bind to. "localhost" only allows access from the local host. "0.0.0.0" binds to all network interfaces.`)
 	port     = flag.Int("port", 8080, "Port to listen on")
 	dataDir  = flag.String("dataDir", ".", "Location of the data directory. It contains CSV files with IMDb IDs and a \"metas\" subdirectory with meta JSON files")
+	logLevel = flag.String("logLevel", "info", `Log level to show only logs with the given and more severe levels. Can be "trace", "debug", "info", "warn", "error", "fatal", "panic"`)
 )
 
 var (
@@ -98,10 +99,17 @@ var (
 func init() {
 	// Timeout for global default HTTP client (for when using `http.Get()`)
 	http.DefaultClient.Timeout = 5 * time.Second
+
+	// Configure logging (except for level, which we only know from the config which is obtained later).
+	log.SetFormatter(&log.TextFormatter{
+		FullTimestamp: true,
+	})
 }
 
 func main() {
 	flag.Parse()
+
+	setLogLevel(*logLevel)
 
 	// Clean input
 	if strings.HasSuffix(*dataDir, "/") {
@@ -167,7 +175,7 @@ func main() {
 	// Timed logger for easier debugging with logs
 	go func() {
 		for {
-			log.Println("...")
+			log.Trace("...")
 			time.Sleep(time.Second)
 		}
 	}()
@@ -212,12 +220,12 @@ func createCatalogResponse(catalog string) []byte {
 func read(filePath string) [][]string {
 	fileBytes, err := ioutil.ReadFile(filePath)
 	if err != nil {
-		log.Fatal("Couldn't read file:", err)
+		log.Fatalf("Couldn't read file: %v", err)
 	}
 	csvReader := csv.NewReader(bytes.NewReader(fileBytes))
 	records, err := csvReader.ReadAll()
 	if err != nil {
-		log.Fatal("Couldn't read CSV:", err)
+		log.Fatalf("Couldn't read CSV: %v", err)
 	}
 	return records
 }
@@ -233,7 +241,7 @@ func readMetas(records [][]string, metasDir string) []string {
 		}
 	}
 	if !found {
-		log.Fatal("Couldn't find \"IMDb ID\" in CSV header:", headRecord)
+		log.Fatalf("Couldn't find \"IMDb ID\" in CSV header: %v", headRecord)
 	}
 
 	var result []string
@@ -242,11 +250,32 @@ func readMetas(records [][]string, metasDir string) []string {
 		// We assume that the metafetcher has been used to already write all meta JSON files for all required IMDb IDs to the directory, so we can directly read the files here via the IMDb ID + ".json", instead of going through the actual files and only read it when it matches one of our IMDb IDs.
 		fileContent, err := ioutil.ReadFile(metasDir + "/" + imdbID + ".json")
 		if err != nil {
-			log.Printf("Couldn't read meta file for IMDb ID %v: %v", imdbID, err)
+			log.Errorf("Couldn't read meta file for IMDb ID %v: %v", imdbID, err)
 			continue
 		}
 		result = append(result, string(fileContent))
 	}
 
 	return result
+}
+
+func setLogLevel(logLevel string) {
+	switch logLevel {
+	case "trace":
+		log.SetLevel(log.TraceLevel)
+	case "debug":
+		log.SetLevel(log.DebugLevel)
+	case "info":
+		log.SetLevel(log.InfoLevel)
+	case "warn":
+		log.SetLevel(log.WarnLevel)
+	case "error":
+		log.SetLevel(log.ErrorLevel)
+	case "fatal":
+		log.SetLevel(log.FatalLevel)
+	case "panic":
+		log.SetLevel(log.PanicLevel)
+	default:
+		log.WithField("logLevel", logLevel).Fatal("Unknown logLevel")
+	}
 }
