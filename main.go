@@ -96,6 +96,11 @@ var (
 	palmeDorCatalogResponse         []byte
 )
 
+var (
+	// Time used in response header so the client caches responses this long
+	resCacheSeconds = strconv.Itoa(1 * 24 * 60 * 60) // 1d
+)
+
 func init() {
 	// Timeout for global default HTTP client (for when using `http.Get()`)
 	http.DefaultClient.Timeout = 5 * time.Second

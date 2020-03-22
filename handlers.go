@@ -70,6 +70,7 @@ func catalogHandler(w http.ResponseWriter, r *http.Request) {
 
 	log.Debugf("Responding with: %s\n", catalogResponse)
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Cache-Control", "max-age="+resCacheSeconds)
 	if _, err := w.Write(catalogResponse); err != nil {
 		log.Errorf("Coldn't write response: %v\n", err)
 	}
