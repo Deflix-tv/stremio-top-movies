@@ -122,7 +122,8 @@ func main() {
 	}
 	cacheAgeSeconds := strconv.FormatFloat(math.Round(cacheAgeDuration.Seconds()), 'f', 0, 64)
 	log.Debugf("Cache age will be set to %v seconds", cacheAgeSeconds)
-	cacheHeaderVal = "max-age=" + cacheAgeSeconds
+	// `public` can be required by some proxies like CloudFlare to cache the response.
+	cacheHeaderVal = "max-age=" + cacheAgeSeconds + ", public"
 
 	// Clean input
 	if strings.HasSuffix(*dataDir, "/") {
