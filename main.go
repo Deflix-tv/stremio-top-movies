@@ -6,6 +6,7 @@ import (
 	"encoding/csv"
 	"flag"
 	"io/ioutil"
+	"math"
 	"net/http"
 	"os"
 	"os/signal"
@@ -30,6 +31,7 @@ var (
 	port     = flag.Int("port", 8080, "Port to listen on")
 	dataDir  = flag.String("dataDir", ".", "Location of the data directory. It contains CSV files with IMDb IDs and a \"metas\" subdirectory with meta JSON files")
 	logLevel = flag.String("logLevel", "info", `Log level to show only logs with the given and more severe levels. Can be "trace", "debug", "info", "warn", "error", "fatal", "panic"`)
+	cacheAge = flag.String("cacheAge", "24h", "Max age for a client or proxy cache. The format must be acceptable by Go's 'time.ParseDuration()', for example \"24h\".")
 )
 
 var (
@@ -97,8 +99,7 @@ var (
 )
 
 var (
-	// Time used in response header so the client caches responses this long
-	resCacheSeconds = strconv.Itoa(1 * 24 * 60 * 60) // 1d
+	cacheHeaderVal string
 )
 
 func init() {
@@ -115,6 +116,13 @@ func main() {
 	flag.Parse()
 
 	setLogLevel(*logLevel)
+	cacheAgeDuration, err := time.ParseDuration(*cacheAge)
+	if err != nil {
+		log.WithError(err).Fatal("Couldn't parse cacheAge")
+	}
+	cacheAgeSeconds := strconv.FormatFloat(math.Round(cacheAgeDuration.Seconds()), 'f', 0, 64)
+	log.Debugf("Cache age will be set to %v seconds", cacheAgeSeconds)
+	cacheHeaderVal = "max-age=" + cacheAgeSeconds
 
 	// Clean input
 	if strings.HasSuffix(*dataDir, "/") {
