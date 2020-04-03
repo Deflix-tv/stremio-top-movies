@@ -49,28 +49,65 @@ func catalogHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	ifNoneMatch := r.Header.Get("If-None-Match")
+
 	var catalogResponse []byte
+	var etag string
 	switch requestedID {
 	case "imdb-top-250":
-		catalogResponse = imdbTop250CatalogResponse
+		etag = imdbTop250CatalogResponseEtag
+		if ifNoneMatch != etag {
+			catalogResponse = imdbTop250CatalogResponse
+		}
 	case "imdb-most-popular":
-		catalogResponse = imdbMostPopularCatalogResponse
+		etag = imdbMostPopularCatalogResponseEtag
+		if ifNoneMatch != etag {
+			catalogResponse = imdbMostPopularCatalogResponse
+		}
 	case "top-box-office-us":
-		catalogResponse = boxOfficeUScatalogResponse
+		etag = boxOfficeUScatalogResponseEtag
+		if ifNoneMatch != etag {
+			catalogResponse = boxOfficeUScatalogResponse
+		}
 	case "rt-certified-fresh":
-		catalogResponse = rtCertifiedFreshCatalogResponse
+		etag = rtCertifiedFreshCatalogResponseEtag
+		if ifNoneMatch != etag {
+			catalogResponse = rtCertifiedFreshCatalogResponse
+		}
 	case "academy-awards-winners":
-		catalogResponse = academyAwardsCatalogResponse
+		etag = academyAwardsCatalogResponseEtag
+		if ifNoneMatch != etag {
+			catalogResponse = academyAwardsCatalogResponse
+		}
 	case "palme-dor-winners":
-		catalogResponse = palmeDorCatalogResponse
+		etag = palmeDorCatalogResponseEtag
+		if ifNoneMatch != etag {
+			catalogResponse = palmeDorCatalogResponse
+		}
 	default:
 		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	notModified := false
+	if ifNoneMatch == "*" {
+		log.Debug("If-None-Match is \"*\", responding with 304")
+		notModified = true
+	} else if len(catalogResponse) == 0 {
+		log.WithField("ETag", ifNoneMatch).Debug("ETag matches, responding with 304")
+		notModified = true
+	}
+	if notModified {
+		w.Header().Set("Cache-Control", cacheHeaderVal) // Required according to https://tools.ietf.org/html/rfc7232#section-4.1
+		w.Header().Set("ETag", etag)                    // We set it to make sure a client doesn't overwrite its cached ETag with an empty string or so.
+		w.WriteHeader(http.StatusNotModified)
 		return
 	}
 
 	log.Debugf("Responding with: %s\n", catalogResponse)
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Cache-Control", cacheHeaderVal)
+	w.Header().Set("ETag", etag)
 	if _, err := w.Write(catalogResponse); err != nil {
 		log.Errorf("Coldn't write response: %v\n", err)
 	}

@@ -15,6 +15,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/cespare/xxhash/v2"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
@@ -96,6 +97,13 @@ var (
 	rtCertifiedFreshCatalogResponse []byte
 	academyAwardsCatalogResponse    []byte
 	palmeDorCatalogResponse         []byte
+
+	imdbTop250CatalogResponseEtag       string
+	imdbMostPopularCatalogResponseEtag  string
+	boxOfficeUScatalogResponseEtag      string
+	rtCertifiedFreshCatalogResponseEtag string
+	academyAwardsCatalogResponseEtag    string
+	palmeDorCatalogResponseEtag         string
 )
 
 var (
@@ -138,6 +146,15 @@ func main() {
 	academyAwardsCatalogResponse = createCatalogResponse("academy-awards-winners")
 	palmeDorCatalogResponse = createCatalogResponse("palme-dor-winners")
 	log.Println("Initialized catalogs")
+
+	log.Println("Calculating ETags...")
+	imdbTop250CatalogResponseEtag = strconv.FormatUint(xxhash.Sum64(imdbTop250CatalogResponse), 16)
+	imdbMostPopularCatalogResponseEtag = strconv.FormatUint(xxhash.Sum64(imdbMostPopularCatalogResponse), 16)
+	boxOfficeUScatalogResponseEtag = strconv.FormatUint(xxhash.Sum64(boxOfficeUScatalogResponse), 16)
+	rtCertifiedFreshCatalogResponseEtag = strconv.FormatUint(xxhash.Sum64(rtCertifiedFreshCatalogResponse), 16)
+	academyAwardsCatalogResponseEtag = strconv.FormatUint(xxhash.Sum64(academyAwardsCatalogResponse), 16)
+	palmeDorCatalogResponseEtag = strconv.FormatUint(xxhash.Sum64(palmeDorCatalogResponse), 16)
+	log.Println("Calculated ETags")
 
 	log.Println("Setting up server...")
 	r := mux.NewRouter()
