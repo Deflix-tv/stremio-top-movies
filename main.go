@@ -39,7 +39,7 @@ var (
 	manifest = stremio.Manifest{
 		ID:          "tv.deflix.stremio-top-movies",
 		Name:        "Top movies",
-		Description: "Multiple catalogs of top movie lists: IMDb Top 250, IMDb Most Popular, Top Box Office (US), Rotten Tomatoes Certified Fresh Movies, Academy Award for Best Picture, Cannes Film Festival Palme d'Or winners, Venice Film Festival Golden Lion winners",
+		Description: "Multiple catalogs of top movie lists: IMDb Top 250, IMDb Most Popular, Top Box Office (US), Rotten Tomatoes Certified Fresh Movies, Academy Award for Best Picture, Cannes Film Festival Palme d'Or winners, Venice Film Festival Golden Lion winners, Berlin International Film Festival Golden Bear winners",
 		Version:     version,
 
 		ResourceItems: []stremio.ResourceItem{

@@ -27,4 +27,5 @@ func main() {
 	wikiClient.scrapeAcademyAwardWinners(*dataDir + "/academy-awards-winners.csv")
 	imdbClient.scrapePalmeDorWinners(*dataDir + "/palme-dor-winners.csv")
 	imdbClient.scrapeGoldenLionWinners(*dataDir + "/golden-lion-winners.csv")
+	imdbClient.scrapeGoldenBearWinners(*dataDir + "/golden-bear-winners.csv")
 }

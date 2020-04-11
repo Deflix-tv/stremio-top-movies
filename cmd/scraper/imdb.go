@@ -187,6 +187,10 @@ func (c IMDbClient) scrapeGoldenLionWinners(filePath string) {
 	c.scrapeEvent("ev0000681", 1946, filePath)
 }
 
+func (c IMDbClient) scrapeGoldenBearWinners(filePath string) {
+	c.scrapeEvent("ev0000091", 1951, filePath)
+}
+
 func (c IMDbClient) scrapeEvent(eventID string, startYear int, filePath string) {
 	f, err := os.Create(filePath)
 	if err != nil {

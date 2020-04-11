@@ -26,6 +26,7 @@ var (
 		"academy-awards-winners",
 		"palme-dor-winners",
 		"golden-lion-winners",
+		"golden-bear-winners",
 	}
 )
 
