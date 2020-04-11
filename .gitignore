@@ -35,4 +35,4 @@
 
 # End of https://www.gitignore.io/api/go,visualstudiocode
 
-/data
+/data/metas
