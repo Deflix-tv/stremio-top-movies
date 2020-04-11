@@ -25,6 +25,7 @@ var (
 		"rt-certified-fresh",
 		"academy-awards-winners",
 		"palme-dor-winners",
+		"golden-lion-winners",
 	}
 )
 

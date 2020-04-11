@@ -26,4 +26,5 @@ func main() {
 	rtClient.scrapeCertifiedFreshDVDstreaming(*dataDir + "/rt-certified-fresh.csv")
 	wikiClient.scrapeAcademyAwardWinners(*dataDir + "/academy-awards-winners.csv")
 	imdbClient.scrapePalmeDorWinners(*dataDir + "/palme-dor-winners.csv")
+	imdbClient.scrapeGoldenLionWinners(*dataDir + "/golden-lion-winners.csv")
 }

@@ -39,7 +39,7 @@ var (
 	manifest = stremio.Manifest{
 		ID:          "tv.deflix.stremio-top-movies",
 		Name:        "Top movies",
-		Description: "Multiple catalogs of top movie lists: IMDb Top 250, IMDb Most Popular, Top Box Office (US), Rotten Tomatoes Certified Fresh Movies, Academy Award for Best Picture, Cannes Film Festival Palme d'Or winners",
+		Description: "Multiple catalogs of top movie lists: IMDb Top 250, IMDb Most Popular, Top Box Office (US), Rotten Tomatoes Certified Fresh Movies, Academy Award for Best Picture, Cannes Film Festival Palme d'Or winners, Venice Film Festival Golden Lion winners",
 		Version:     version,
 
 		ResourceItems: []stremio.ResourceItem{
@@ -86,6 +86,16 @@ var (
 			Type: "movie",
 			ID:   "palme-dor-winners",
 			Name: "Cannes Film Festival Palme d'Or winners",
+		},
+		{
+			Type: "movie",
+			ID:   "golden-lion-winners",
+			Name: "Venice Film Festival Golden Lion winners",
+		},
+		{
+			Type: "movie",
+			ID:   "golden-bear-winners",
+			Name: "Berlin International Film Festival Golden Bear winners",
 		},
 	}
 )
