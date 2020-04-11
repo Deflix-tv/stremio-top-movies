@@ -16,7 +16,7 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-func scrapeIMDbTop250(httpClient *http.Client) {
+func scrapeIMDbTop250(httpClient *http.Client, filePath string) {
 	req, _ := http.NewRequest("GET", "https://www.imdb.com/chart/top/", nil)
 	// Must set language, otherwise IMDb determines the language based on IP and then movie names are language-specific.
 	req.Header.Add("accept-language", "en-US")
@@ -35,7 +35,7 @@ func scrapeIMDbTop250(httpClient *http.Client) {
 		log.Fatal(err)
 	}
 
-	f, err := os.Create(*dataDir + "/imdb-top-250.csv")
+	f, err := os.Create(filePath)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -66,7 +66,7 @@ func scrapeIMDbTop250(httpClient *http.Client) {
 	})
 }
 
-func scrapeIMDbMostPopular(httpClient *http.Client) {
+func scrapeIMDbMostPopular(httpClient *http.Client, filePath string) {
 	req, _ := http.NewRequest("GET", "https://www.imdb.com/chart/moviemeter", nil)
 	// Must set language, otherwise IMDb determines the language based on IP and then movie names are language-specific.
 	req.Header.Add("accept-language", "en-US")
@@ -85,7 +85,7 @@ func scrapeIMDbMostPopular(httpClient *http.Client) {
 		log.Fatal(err)
 	}
 
-	f, err := os.Create(*dataDir + "/imdb-most-popular.csv")
+	f, err := os.Create(filePath)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -118,7 +118,7 @@ func scrapeIMDbMostPopular(httpClient *http.Client) {
 	})
 }
 
-func scrapeBoxOfficeWeekendUS(httpClient *http.Client) {
+func scrapeBoxOfficeWeekendUS(httpClient *http.Client, filePath string) {
 	req, _ := http.NewRequest("GET", "https://www.imdb.com/chart/boxoffice", nil)
 	// Must set language, otherwise IMDb determines the language based on IP and then movie names are language-specific.
 	req.Header.Add("accept-language", "en-US")
@@ -137,7 +137,7 @@ func scrapeBoxOfficeWeekendUS(httpClient *http.Client) {
 		log.Fatal(err)
 	}
 
-	f, err := os.Create(*dataDir + "/top-box-office-us.csv")
+	f, err := os.Create(filePath)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -200,8 +200,8 @@ func getID(title string, httpClient *http.Client) string {
 	return id
 }
 
-func scrapeWikipediaPalmeDorWinners(httpClient *http.Client) {
-	f, err := os.Create(*dataDir + "/palme-dor-winners.csv")
+func scrapeWikipediaPalmeDorWinners(httpClient *http.Client, filePath string) {
+	f, err := os.Create(filePath)
 	if err != nil {
 		log.Fatal(err)
 	}

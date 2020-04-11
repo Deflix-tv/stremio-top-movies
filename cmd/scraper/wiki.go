@@ -13,7 +13,7 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
-func scrapeWikipediaAcademyAwardWinners(httpClient *http.Client) {
+func scrapeWikipediaAcademyAwardWinners(httpClient *http.Client, filePath string) {
 	req, _ := http.NewRequest("GET", "https://en.wikipedia.org/wiki/List_of_Academy_Award-winning_films", nil)
 	res, err := httpClient.Do(req)
 	if err != nil {
@@ -30,7 +30,7 @@ func scrapeWikipediaAcademyAwardWinners(httpClient *http.Client) {
 		log.Fatal(err)
 	}
 
-	f, err := os.Create(*dataDir + "/academy-awards-winners.csv")
+	f, err := os.Create(filePath)
 	if err != nil {
 		log.Fatal(err)
 	}

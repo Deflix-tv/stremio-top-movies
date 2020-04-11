@@ -23,10 +23,10 @@ func main() {
 		Timeout: 5 * time.Second,
 	}
 
-	scrapeIMDbTop250(&httpClient)
-	scrapeIMDbMostPopular(&httpClient)
-	scrapeBoxOfficeWeekendUS(&httpClient)
-	scrapeRTcertifiedFreshDVDstreaming(&httpClient)
-	scrapeWikipediaAcademyAwardWinners(&httpClient)
-	scrapeWikipediaPalmeDorWinners(&httpClient)
+	scrapeIMDbTop250(&httpClient, *dataDir+"/imdb-top-250.csv")
+	scrapeIMDbMostPopular(&httpClient, *dataDir+"/imdb-most-popular.csv")
+	scrapeBoxOfficeWeekendUS(&httpClient, *dataDir+"/top-box-office-us.csv")
+	scrapeRTcertifiedFreshDVDstreaming(&httpClient, *dataDir+"/rt-certified-fresh.csv")
+	scrapeWikipediaAcademyAwardWinners(&httpClient, *dataDir+"/academy-awards-winners.csv")
+	scrapeWikipediaPalmeDorWinners(&httpClient, *dataDir+"/palme-dor-winners.csv")
 }
