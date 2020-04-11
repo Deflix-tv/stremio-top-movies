@@ -60,7 +60,7 @@ var (
 		{
 			Type: "movie",
 			ID:   "imdb-top-250",
-			Name: "IMDb Top 250",
+			Name: "IMDb Top Rated (a.k.a. Top 250)",
 		},
 		{
 			Type: "movie",
@@ -80,7 +80,7 @@ var (
 		{
 			Type: "movie",
 			ID:   "academy-awards-winners",
-			Name: "Academy Award for Best Picture",
+			Name: "Academy Award for Best Picture winners",
 		},
 		{
 			Type: "movie",
