@@ -49,66 +49,46 @@ func catalogHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ifNoneMatch := r.Header.Get("If-None-Match")
-
-	var catalogResponse []byte
-	var etag string
-	switch requestedID {
-	case "imdb-top-250":
-		etag = imdbTop250CatalogResponseEtag
-		if ifNoneMatch != etag {
-			catalogResponse = imdbTop250CatalogResponse
+	// Existing catalog IDs only
+	found := false
+	for _, catalogItem := range catalogs {
+		if requestedID == catalogItem.ID {
+			found = true
+			break
 		}
-	case "imdb-most-popular":
-		etag = imdbMostPopularCatalogResponseEtag
-		if ifNoneMatch != etag {
-			catalogResponse = imdbMostPopularCatalogResponse
-		}
-	case "top-box-office-us":
-		etag = boxOfficeUScatalogResponseEtag
-		if ifNoneMatch != etag {
-			catalogResponse = boxOfficeUScatalogResponse
-		}
-	case "rt-certified-fresh":
-		etag = rtCertifiedFreshCatalogResponseEtag
-		if ifNoneMatch != etag {
-			catalogResponse = rtCertifiedFreshCatalogResponse
-		}
-	case "academy-awards-winners":
-		etag = academyAwardsCatalogResponseEtag
-		if ifNoneMatch != etag {
-			catalogResponse = academyAwardsCatalogResponse
-		}
-	case "palme-dor-winners":
-		etag = palmeDorCatalogResponseEtag
-		if ifNoneMatch != etag {
-			catalogResponse = palmeDorCatalogResponse
-		}
-	default:
+	}
+	if !found {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
 
-	notModified := false
+	// Set a response if the client sends no or a different value
+	ifNoneMatch := r.Header.Get("If-None-Match")
+	etag := etags[requestedID]
+	var response []byte
+	modified := false
 	if ifNoneMatch == "*" {
 		log.Debug("If-None-Match is \"*\", responding with 304")
-		notModified = true
-	} else if len(catalogResponse) == 0 {
-		log.WithField("ETag", ifNoneMatch).Debug("ETag matches, responding with 304")
-		notModified = true
+		// Keep modified `false`
+	} else if ifNoneMatch != etag {
+		log.WithField("If-None-Match", ifNoneMatch).WithField("ETag", etag).Debug("If-None-Match != ETag")
+		response = responses[requestedID]
+		modified = true
+	} else {
+		log.WithField("ETag", etag).Debug("ETag matches, responding with 304")
 	}
-	if notModified {
+
+	if !modified {
 		w.Header().Set("Cache-Control", cacheHeaderVal) // Required according to https://tools.ietf.org/html/rfc7232#section-4.1
 		w.Header().Set("ETag", etag)                    // We set it to make sure a client doesn't overwrite its cached ETag with an empty string or so.
 		w.WriteHeader(http.StatusNotModified)
 		return
 	}
-
-	log.Debugf("Responding with: %s\n", catalogResponse)
+	log.Debugf("Responding with: %s\n", response)
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Cache-Control", cacheHeaderVal)
 	w.Header().Set("ETag", etag)
-	if _, err := w.Write(catalogResponse); err != nil {
+	if _, err := w.Write(response); err != nil {
 		log.Errorf("Coldn't write response: %v\n", err)
 	}
 }

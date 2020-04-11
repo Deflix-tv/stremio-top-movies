@@ -28,7 +28,7 @@ func scrapeRTcertifiedFreshDVDstreaming(httpClient *http.Client) {
 		log.Fatalf("status code error: %d %s", res.StatusCode, res.Status)
 	}
 
-	f, err := os.Create(*dataDir + "/rt-certified-fresh-dvd-streaming.csv")
+	f, err := os.Create(*dataDir + "/rt-certified-fresh.csv")
 	if err != nil {
 		log.Fatal(err)
 	}

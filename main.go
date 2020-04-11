@@ -42,9 +42,13 @@ var (
 		Description: "Multiple catalogs of top movie lists: IMDb Top 250, IMDb Most Popular, Top Box Office (US), Rotten Tomatoes Certified Fresh Movies, Academy Award for Best Picture, Cannes Film Festival Palme d'Or winners",
 		Version:     version,
 
-		ResourceItems: resources,
-		Types:         []string{"movie"},
-		Catalogs:      catalogs,
+		ResourceItems: []stremio.ResourceItem{
+			{
+				Name: "catalog",
+			},
+		},
+		Types:    []string{"movie"},
+		Catalogs: catalogs,
 
 		IDprefixes: []string{"tt"},
 		// Must use www.deflix.tv instead of just deflix.tv because GitHub takes care of redirecting non-www to www and this leads to HTTPS certificate issues.
@@ -52,37 +56,37 @@ var (
 		Logo:       "https://www.deflix.tv/images/Logo-250px.png",
 	}
 
-	resources = []stremio.ResourceItem{
-		stremio.ResourceItem{
-			Name: "catalog",
-		},
-	}
-
 	catalogs = []stremio.CatalogItem{
-		stremio.CatalogItem{
+		{
 			Type: "movie",
 			ID:   "imdb-top-250",
-			Name: "IMDb Top Rated (a.k.a. \"IMDb Top 250\")"},
-		stremio.CatalogItem{
+			Name: "IMDb Top 250",
+		},
+		{
 			Type: "movie",
 			ID:   "imdb-most-popular",
-			Name: "IMDb Most Popular"},
-		stremio.CatalogItem{
+			Name: "IMDb Most Popular",
+		},
+		{
 			Type: "movie",
 			ID:   "top-box-office-us",
-			Name: "Top Box Office (US) (last weekend)"},
-		stremio.CatalogItem{
+			Name: "Top Box Office (US, last weekend)",
+		},
+		{
 			Type: "movie",
 			ID:   "rt-certified-fresh",
-			Name: "Rotten Tomatoes Certified Fresh (DVD + Streaming)"},
-		stremio.CatalogItem{
+			Name: "Rotten Tomatoes Certified Fresh (DVD & Streaming)",
+		},
+		{
 			Type: "movie",
 			ID:   "academy-awards-winners",
-			Name: "Academy Award for Best Picture"},
-		stremio.CatalogItem{
+			Name: "Academy Award for Best Picture",
+		},
+		{
 			Type: "movie",
 			ID:   "palme-dor-winners",
-			Name: "Cannes Film Festival Palme d'Or winners"},
+			Name: "Cannes Film Festival Palme d'Or winners",
+		},
 	}
 )
 
@@ -91,22 +95,8 @@ const (
 )
 
 var (
-	imdbTop250CatalogResponse       []byte
-	imdbMostPopularCatalogResponse  []byte
-	boxOfficeUScatalogResponse      []byte
-	rtCertifiedFreshCatalogResponse []byte
-	academyAwardsCatalogResponse    []byte
-	palmeDorCatalogResponse         []byte
-
-	imdbTop250CatalogResponseEtag       string
-	imdbMostPopularCatalogResponseEtag  string
-	boxOfficeUScatalogResponseEtag      string
-	rtCertifiedFreshCatalogResponseEtag string
-	academyAwardsCatalogResponseEtag    string
-	palmeDorCatalogResponseEtag         string
-)
-
-var (
+	responses      = make(map[string][]byte, len(catalogs))
+	etags          = make(map[string]string, len(catalogs))
 	cacheHeaderVal string
 )
 
@@ -139,21 +129,18 @@ func main() {
 	}
 
 	log.Println("Initializing catalogs...")
-	imdbTop250CatalogResponse = createCatalogResponse("imdb-top-250")
-	imdbMostPopularCatalogResponse = createCatalogResponse("imdb-most-popular")
-	boxOfficeUScatalogResponse = createCatalogResponse("box-office-weekend-us")
-	rtCertifiedFreshCatalogResponse = createCatalogResponse("rt-certified-fresh-dvd-streaming")
-	academyAwardsCatalogResponse = createCatalogResponse("academy-awards-winners")
-	palmeDorCatalogResponse = createCatalogResponse("palme-dor-winners")
+	for _, catalogItem := range catalogs {
+		id := catalogItem.ID
+		responses[id] = createCatalogResponse(id)
+	}
 	log.Println("Initialized catalogs")
 
 	log.Println("Calculating ETags...")
-	imdbTop250CatalogResponseEtag = strconv.FormatUint(xxhash.Sum64(imdbTop250CatalogResponse), 16)
-	imdbMostPopularCatalogResponseEtag = strconv.FormatUint(xxhash.Sum64(imdbMostPopularCatalogResponse), 16)
-	boxOfficeUScatalogResponseEtag = strconv.FormatUint(xxhash.Sum64(boxOfficeUScatalogResponse), 16)
-	rtCertifiedFreshCatalogResponseEtag = strconv.FormatUint(xxhash.Sum64(rtCertifiedFreshCatalogResponse), 16)
-	academyAwardsCatalogResponseEtag = strconv.FormatUint(xxhash.Sum64(academyAwardsCatalogResponse), 16)
-	palmeDorCatalogResponseEtag = strconv.FormatUint(xxhash.Sum64(palmeDorCatalogResponse), 16)
+	for _, catalogItem := range catalogs {
+		id := catalogItem.ID
+		hash := xxhash.Sum64(responses[id])
+		etags[id] = strconv.FormatUint(hash, 16)
+	}
 	log.Println("Calculated ETags")
 
 	log.Println("Setting up server...")

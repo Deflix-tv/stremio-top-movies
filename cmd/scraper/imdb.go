@@ -137,7 +137,7 @@ func scrapeBoxOfficeWeekendUS(httpClient *http.Client) {
 		log.Fatal(err)
 	}
 
-	f, err := os.Create(*dataDir + "/box-office-weekend-us.csv")
+	f, err := os.Create(*dataDir + "/top-box-office-us.csv")
 	if err != nil {
 		log.Fatal(err)
 	}

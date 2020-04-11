@@ -21,8 +21,8 @@ var (
 	lists = []string{
 		"imdb-top-250",
 		"imdb-most-popular",
-		"box-office-weekend-us",
-		"rt-certified-fresh-dvd-streaming",
+		"top-box-office-us",
+		"rt-certified-fresh",
 		"academy-awards-winners",
 		"palme-dor-winners",
 	}
