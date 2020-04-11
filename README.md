@@ -5,10 +5,12 @@ Stremio addon for multiple catalogs of top movies:
 
 - IMDb Top Rated (a.k.a. IMDb Top 250)
 - IMDb Most Popular
-- Top Box Office (US)
+- Top Box Office (US, last weekend)
 - Rotten Tomatoes Certified Fresh Movies (DVD & Streaming)
-- Academy Award for Best Picture
+- Academy Award for Best Picture winners
 - Cannes Film Festival Palme d'Or winners
+- Venice Film Festival Golden Lion winners
+- Berlin International Film Festival Golden Bear winners
 
 Contents
 --------
@@ -55,8 +57,12 @@ The following options can be configured via command line argument:
 Usage of stremio-top-movies:
   -bindAddr string
         Local interface address to bind to. "localhost" only allows access from the local host. "0.0.0.0" binds to all network interfaces. (default "localhost")
+  -cacheAge string
+        Max age for a client or proxy cache. The format must be acceptable by Go's 'time.ParseDuration()', for example "24h". (default "24h")
   -dataDir string
         Location of the data directory. It contains CSV files with IMDb IDs and a "metas" subdirectory with meta JSON files (default ".")
+  -logLevel string
+        Log level to show only logs with the given and more severe levels. Can be "trace", "debug", "info", "warn", "error", "fatal", "panic" (default "info")
   -port int
         Port to listen on (default 8080)
 ```
