@@ -9,17 +9,36 @@ import (
 	"os"
 	"regexp"
 	"strconv"
+	"time"
 
 	"github.com/tidwall/gjson"
 )
 
 var rtFreshRegex = regexp.MustCompile(`\[\{"id":.*`)
 
-func scrapeRTcertifiedFreshDVDstreaming(httpClient *http.Client, filePath string) {
+type getIDer interface {
+	getID(title string) string
+}
+
+type RTclient struct {
+	httpClient *http.Client
+	idGetter   getIDer
+}
+
+func newRTclient(idGetter getIDer) RTclient {
+	return RTclient{
+		httpClient: &http.Client{
+			Timeout: 5 * time.Second,
+		},
+		idGetter: idGetter,
+	}
+}
+
+func (c RTclient) scrapeCertifiedFreshDVDstreaming(filePath string) {
 	req, _ := http.NewRequest("GET", "https://www.rottentomatoes.com/browse/cf-dvd-streaming-all", nil)
 	// Set language just to make sure it's not like with IMDb where the movie names are depending on the country of the request's IP.
 	req.Header.Add("accept-language", "en-US")
-	res, err := httpClient.Do(req)
+	res, err := c.httpClient.Do(req)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -58,7 +77,7 @@ func scrapeRTcertifiedFreshDVDstreaming(httpClient *http.Client, filePath string
 		rank += 1
 		title := titleResult.String()
 		// Search for title on IMDb to get its IMDb ID
-		imdbID := getID(title, httpClient)
+		imdbID := c.idGetter.getID(title)
 		if imdbID == "" {
 			log.Fatal("Couldn't determine IMDb ID for title:", title)
 		}

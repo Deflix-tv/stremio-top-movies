@@ -16,11 +16,23 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-func scrapeIMDbTop250(httpClient *http.Client, filePath string) {
+type IMDbClient struct {
+	httpClient *http.Client
+}
+
+func newIMDbClient() IMDbClient {
+	return IMDbClient{
+		httpClient: &http.Client{
+			Timeout: 5 * time.Second,
+		},
+	}
+}
+
+func (c IMDbClient) scrapeTop250(filePath string) {
 	req, _ := http.NewRequest("GET", "https://www.imdb.com/chart/top/", nil)
 	// Must set language, otherwise IMDb determines the language based on IP and then movie names are language-specific.
 	req.Header.Add("accept-language", "en-US")
-	res, err := httpClient.Do(req)
+	res, err := c.httpClient.Do(req)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -66,11 +78,11 @@ func scrapeIMDbTop250(httpClient *http.Client, filePath string) {
 	})
 }
 
-func scrapeIMDbMostPopular(httpClient *http.Client, filePath string) {
+func (c IMDbClient) scrapeMostPopular(filePath string) {
 	req, _ := http.NewRequest("GET", "https://www.imdb.com/chart/moviemeter", nil)
 	// Must set language, otherwise IMDb determines the language based on IP and then movie names are language-specific.
 	req.Header.Add("accept-language", "en-US")
-	res, err := httpClient.Do(req)
+	res, err := c.httpClient.Do(req)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -118,11 +130,11 @@ func scrapeIMDbMostPopular(httpClient *http.Client, filePath string) {
 	})
 }
 
-func scrapeBoxOfficeWeekendUS(httpClient *http.Client, filePath string) {
+func (c IMDbClient) scrapeBoxOfficeUSWeekend(filePath string) {
 	req, _ := http.NewRequest("GET", "https://www.imdb.com/chart/boxoffice", nil)
 	// Must set language, otherwise IMDb determines the language based on IP and then movie names are language-specific.
 	req.Header.Add("accept-language", "en-US")
-	res, err := httpClient.Do(req)
+	res, err := c.httpClient.Do(req)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -167,12 +179,12 @@ func scrapeBoxOfficeWeekendUS(httpClient *http.Client, filePath string) {
 	})
 }
 
-func getID(title string, httpClient *http.Client) string {
+func (c IMDbClient) getID(title string) string {
 	title = url.QueryEscape(title)
 	req, _ := http.NewRequest("GET", "https://www.imdb.com/find?q="+title, nil)
 	// Must set language, otherwise IMDb determines the language based on IP and then movie names are language-specific.
 	req.Header.Add("accept-language", "en-US")
-	res, err := httpClient.Do(req)
+	res, err := c.httpClient.Do(req)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -200,7 +212,7 @@ func getID(title string, httpClient *http.Client) string {
 	return id
 }
 
-func scrapeWikipediaPalmeDorWinners(httpClient *http.Client, filePath string) {
+func (c IMDbClient) scrapePalmeDorWinners(filePath string) {
 	f, err := os.Create(filePath)
 	if err != nil {
 		log.Fatal(err)
@@ -221,7 +233,7 @@ func scrapeWikipediaPalmeDorWinners(httpClient *http.Client, filePath string) {
 		// Must set language, otherwise IMDb determines the language based on IP and then movie names are language-specific.
 		// TODO: Doesn't seem to help here!
 		req.Header.Add("accept-language", "en-US")
-		res, err := httpClient.Do(req)
+		res, err := c.httpClient.Do(req)
 		if err != nil {
 			log.Fatal(err)
 		}

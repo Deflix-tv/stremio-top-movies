@@ -2,9 +2,7 @@ package main
 
 import (
 	"flag"
-	"net/http"
 	"strings"
-	"time"
 )
 
 var (
@@ -19,14 +17,13 @@ func main() {
 		*dataDir = strings.TrimRight(*dataDir, "/")
 	}
 
-	httpClient := http.Client{
-		Timeout: 5 * time.Second,
-	}
-
-	scrapeIMDbTop250(&httpClient, *dataDir+"/imdb-top-250.csv")
-	scrapeIMDbMostPopular(&httpClient, *dataDir+"/imdb-most-popular.csv")
-	scrapeBoxOfficeWeekendUS(&httpClient, *dataDir+"/top-box-office-us.csv")
-	scrapeRTcertifiedFreshDVDstreaming(&httpClient, *dataDir+"/rt-certified-fresh.csv")
-	scrapeWikipediaAcademyAwardWinners(&httpClient, *dataDir+"/academy-awards-winners.csv")
-	scrapeWikipediaPalmeDorWinners(&httpClient, *dataDir+"/palme-dor-winners.csv")
+	imdbClient := newIMDbClient()
+	rtClient := newRTclient(imdbClient)
+	wikiClient := newWikiClient()
+	imdbClient.scrapeTop250(*dataDir + "/imdb-top-250.csv")
+	imdbClient.scrapeMostPopular(*dataDir + "/imdb-most-popular.csv")
+	imdbClient.scrapeBoxOfficeUSWeekend(*dataDir + "/top-box-office-us.csv")
+	rtClient.scrapeCertifiedFreshDVDstreaming(*dataDir + "/rt-certified-fresh.csv")
+	wikiClient.scrapeAcademyAwardWinners(*dataDir + "/academy-awards-winners.csv")
+	imdbClient.scrapePalmeDorWinners(*dataDir + "/palme-dor-winners.csv")
 }

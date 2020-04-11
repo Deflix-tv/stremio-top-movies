@@ -13,9 +13,21 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
-func scrapeWikipediaAcademyAwardWinners(httpClient *http.Client, filePath string) {
+type WikiClient struct {
+	httpClient *http.Client
+}
+
+func newWikiClient() WikiClient {
+	return WikiClient{
+		httpClient: &http.Client{
+			Timeout: 5 * time.Second,
+		},
+	}
+}
+
+func (c WikiClient) scrapeAcademyAwardWinners(filePath string) {
 	req, _ := http.NewRequest("GET", "https://en.wikipedia.org/wiki/List_of_Academy_Award-winning_films", nil)
-	res, err := httpClient.Do(req)
+	res, err := c.httpClient.Do(req)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -57,7 +69,7 @@ func scrapeWikipediaAcademyAwardWinners(httpClient *http.Client, filePath string
 		year := s.Find("a").Eq(1).Text()
 
 		req, _ = http.NewRequest("GET", url, nil)
-		res, err := httpClient.Do(req)
+		res, err := c.httpClient.Do(req)
 		if err != nil {
 			log.Fatal(err)
 		}
