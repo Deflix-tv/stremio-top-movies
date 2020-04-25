@@ -6,7 +6,8 @@ import (
 )
 
 var (
-	dataDir = flag.String("dataDir", ".", "Location of the data directory. This is where the CSV files will be written.")
+	dataDir   = flag.String("dataDir", ".", "Location of the data directory. This is where the CSV files will be written.")
+	festivals = flag.Bool("festivals", false, "Include scraping film festival data.")
 )
 
 func main() {
@@ -24,8 +25,10 @@ func main() {
 	imdbClient.scrapeMostPopular(*dataDir + "/imdb-most-popular.csv")
 	imdbClient.scrapeBoxOfficeUSWeekend(*dataDir + "/top-box-office-us.csv")
 	rtClient.scrapeCertifiedFreshDVDstreaming(*dataDir + "/rt-certified-fresh.csv")
-	wikiClient.scrapeAcademyAwardWinners(*dataDir + "/academy-awards-winners.csv")
-	imdbClient.scrapePalmeDorWinners(*dataDir + "/palme-dor-winners.csv")
-	imdbClient.scrapeGoldenLionWinners(*dataDir + "/golden-lion-winners.csv")
-	imdbClient.scrapeGoldenBearWinners(*dataDir + "/golden-bear-winners.csv")
+	if *festivals {
+		wikiClient.scrapeAcademyAwardWinners(*dataDir + "/academy-awards-winners.csv")
+		imdbClient.scrapePalmeDorWinners(*dataDir + "/palme-dor-winners.csv")
+		imdbClient.scrapeGoldenLionWinners(*dataDir + "/golden-lion-winners.csv")
+		imdbClient.scrapeGoldenBearWinners(*dataDir + "/golden-bear-winners.csv")
+	}
 }
