@@ -6,14 +6,12 @@ import (
 	"encoding/json"
 	"flag"
 	"io/ioutil"
-	"log"
-	"math"
 	"net/http"
-	"strconv"
 	"strings"
 	"time"
 
 	"github.com/deflix-tv/go-stremio"
+	"go.uber.org/zap"
 )
 
 const (
@@ -111,12 +109,16 @@ func main() {
 
 	// Prep
 
+	logger, err := stremio.NewLogger(*logLevel)
+	if err != nil {
+		panic(err)
+	}
+
 	cacheAgeDuration, err := time.ParseDuration(*cacheAge)
 	if err != nil {
-		log.Fatalf("Couldn't parse cacheAge: %v", err)
+		logger.Fatal("Couldn't parse cacheAge", zap.Error(err))
 	}
-	cacheAgeSeconds := strconv.FormatFloat(math.Round(cacheAgeDuration.Seconds()), 'f', 0, 64)
-	log.Printf("Cache age will be set to %v seconds", cacheAgeSeconds)
+	logger.Info("Cache age set", zap.Duration("duration", cacheAgeDuration))
 	// Clean input
 	if strings.HasSuffix(*dataDir, "/") {
 		*dataDir = strings.TrimRight(*dataDir, "/")
@@ -124,12 +126,12 @@ func main() {
 
 	// Initialize catalogs
 
-	log.Println("Initializing catalogs...")
+	logger.Info("Initializing catalogs...")
 	for _, catalogItem := range catalogs {
 		id := catalogItem.ID
-		responses[id] = createCatalogResponse(id)
+		responses[id] = createCatalogResponse(id, logger)
 	}
-	log.Println("Initialized catalogs")
+	logger.Info("Initialized catalogs")
 
 	// Set up addon
 
@@ -137,7 +139,7 @@ func main() {
 	options := stremio.Options{
 		BindAddr:            *bindAddr,
 		Port:                *port,
-		LogLevel:            *logLevel,
+		Logger:              logger,
 		RedirectURL:         redirectURL,
 		CacheAgeCatalogs:    cacheAgeDuration,
 		CachePublicCatalogs: true,
@@ -145,7 +147,7 @@ func main() {
 	}
 	addon, err := stremio.NewAddon(manifest, catalogHandlers, nil, options)
 	if err != nil {
-		log.Fatalf("Couldn't create addon: %v", err)
+		logger.Fatal("Couldn't create addon", zap.Error(err))
 	}
 
 	// Go!
@@ -153,15 +155,15 @@ func main() {
 	addon.Run()
 }
 
-func createCatalogResponse(catalog string) []stremio.MetaPreviewItem {
+func createCatalogResponse(catalog string, logger *zap.Logger) []stremio.MetaPreviewItem {
 	var result []stremio.MetaPreviewItem
 
-	records := readCSV(*dataDir + "/" + catalog + ".csv")
-	metas := readMetas(records, *dataDir+"/metas")
+	records := readCSV(*dataDir+"/"+catalog+".csv", logger)
+	metas := readMetas(records, *dataDir+"/metas", logger)
 	for _, meta := range metas {
 		var item stremio.MetaPreviewItem
 		if err := json.Unmarshal(meta, &item); err != nil {
-			log.Printf("Couldn't unmarshal meta JSON into stremio.MetaPreviewItem: %v", err)
+			logger.Warn("Couldn't unmarshal meta JSON into stremio.MetaPreviewItem", zap.Error(err))
 		}
 		result = append(result, item)
 	}
@@ -169,20 +171,20 @@ func createCatalogResponse(catalog string) []stremio.MetaPreviewItem {
 	return result
 }
 
-func readCSV(filePath string) [][]string {
+func readCSV(filePath string, logger *zap.Logger) [][]string {
 	fileBytes, err := ioutil.ReadFile(filePath)
 	if err != nil {
-		log.Fatalf("Couldn't read file: %v", err)
+		logger.Fatal("Couldn't read file", zap.Error(err))
 	}
 	csvReader := csv.NewReader(bytes.NewReader(fileBytes))
 	records, err := csvReader.ReadAll()
 	if err != nil {
-		log.Fatalf("Couldn't read CSV: %v", err)
+		logger.Fatal("Couldn't read CSV", zap.Error(err))
 	}
 	return records
 }
 
-func readMetas(records [][]string, metasDir string) [][]byte {
+func readMetas(records [][]string, metasDir string, logger *zap.Logger) [][]byte {
 	headRecord := records[0]
 	imdbIndex := 0
 	found := false
@@ -193,7 +195,7 @@ func readMetas(records [][]string, metasDir string) [][]byte {
 		}
 	}
 	if !found {
-		log.Fatalf("Couldn't find \"IMDb ID\" in CSV header: %v", headRecord)
+		logger.Fatal("Couldn't find \"IMDb ID\" in CSV header", zap.Strings("csvHeader", headRecord))
 	}
 
 	var result [][]byte
@@ -202,7 +204,7 @@ func readMetas(records [][]string, metasDir string) [][]byte {
 		// We assume that the metafetcher has been used to already write all meta JSON files for all required IMDb IDs to the directory, so we can directly read the files here via the IMDb ID + ".json", instead of going through the actual files and only read it when it matches one of our IMDb IDs.
 		fileContent, err := ioutil.ReadFile(metasDir + "/" + imdbID + ".json")
 		if err != nil {
-			log.Printf("Couldn't read meta file for IMDb ID %v: %v", imdbID, err)
+			logger.Warn("Couldn't read meta file for IMDb ID", zap.String("imdbID", imdbID), zap.Error(err))
 			continue
 		}
 		result = append(result, fileContent)
