@@ -7,7 +7,7 @@ import (
 func movieHandler(id string, userData interface{}) ([]stremio.MetaPreviewItem, error) {
 	// Existing catalog IDs only
 	found := false
-	for _, catalogItem := range catalogs {
+	for _, catalogItem := range formerCatalogs {
 		if id == catalogItem.ID {
 			found = true
 			break

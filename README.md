@@ -7,10 +7,8 @@ Stremio addon for multiple catalogs of top movies:
 - IMDb Most Popular
 - Top Box Office (US, last weekend)
 - Rotten Tomatoes Certified Fresh Movies (DVD & Streaming)
-- Academy Award for Best Picture winners
-- Cannes Film Festival Palme d'Or winners
-- Venice Film Festival Golden Lion winners
-- Berlin International Film Festival Golden Bear winners
+
+For film festival catalogs, which this addon also served in the past, please check out [https://github.com/Deflix-tv/stremio-film-festivals](https://github.com/Deflix-tv/stremio-film-festivals).
 
 Contents
 --------

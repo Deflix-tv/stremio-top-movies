@@ -30,7 +30,7 @@ var (
 	manifest = stremio.Manifest{
 		ID:          "tv.deflix.stremio-top-movies",
 		Name:        "Top movies",
-		Description: "Multiple catalogs of top movie lists: IMDb Top 250, IMDb Most Popular, Top Box Office (US), Rotten Tomatoes Certified Fresh Movies, Academy Award for Best Picture, Cannes Film Festival Palme d'Or winners, Venice Film Festival Golden Lion winners, Berlin International Film Festival Golden Bear winners",
+		Description: "Multiple catalogs of top movie lists: IMDb Top 250, IMDb Most Popular, Top Box Office (US), Rotten Tomatoes Certified Fresh Movies",
 		Version:     version,
 
 		ResourceItems: []stremio.ResourceItem{
@@ -39,7 +39,7 @@ var (
 			},
 		},
 		Types:    []string{"movie"},
-		Catalogs: catalogs,
+		Catalogs: advertisedCatalogs,
 
 		IDprefixes: []string{"tt"},
 		// Must use www.deflix.tv instead of just deflix.tv because GitHub takes care of redirecting non-www to www and this leads to HTTPS certificate issues.
@@ -47,7 +47,31 @@ var (
 		Logo:       "https://www.deflix.tv/images/Logo-250px.png",
 	}
 
-	catalogs = []stremio.CatalogItem{
+	// We only have the subset in the manifest, because in the future we're only going to serve these
+	advertisedCatalogs = []stremio.CatalogItem{
+		{
+			Type: "movie",
+			ID:   "imdb-top-250",
+			Name: "IMDb Top Rated (a.k.a. Top 250)",
+		},
+		{
+			Type: "movie",
+			ID:   "imdb-most-popular",
+			Name: "IMDb Most Popular",
+		},
+		{
+			Type: "movie",
+			ID:   "top-box-office-us",
+			Name: "Top Box Office (US, last weekend)",
+		},
+		{
+			Type: "movie",
+			ID:   "rt-certified-fresh",
+			Name: "Rotten Tomatoes Certified Fresh (DVD & Streaming)",
+		},
+	}
+	// For backward compatibility we keep these for now
+	formerCatalogs = []stremio.CatalogItem{
 		{
 			Type: "movie",
 			ID:   "imdb-top-250",
@@ -96,7 +120,7 @@ const (
 )
 
 var (
-	responses = make(map[string][]stremio.MetaPreviewItem, len(catalogs))
+	responses = make(map[string][]stremio.MetaPreviewItem, len(formerCatalogs))
 )
 
 func init() {
@@ -127,7 +151,7 @@ func main() {
 	// Initialize catalogs
 
 	logger.Info("Initializing catalogs...")
-	for _, catalogItem := range catalogs {
+	for _, catalogItem := range formerCatalogs {
 		id := catalogItem.ID
 		responses[id] = createCatalogResponse(id, logger)
 	}
