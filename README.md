@@ -60,7 +60,7 @@ Usage of stremio-top-movies:
   -dataDir string
         Location of the data directory. It contains CSV files with IMDb IDs and a "metas" subdirectory with meta JSON files (default ".")
   -logLevel string
-        Log level to show only logs with the given and more severe levels. Can be "trace", "debug", "info", "warn", "error", "fatal", "panic" (default "info")
+        Log level to show only logs with the given and more severe levels. Can be "debug", "info", "warn", "error" (default "info")
   -port int
         Port to listen on (default 8080)
 ```
