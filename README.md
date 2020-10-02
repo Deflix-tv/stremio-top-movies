@@ -34,7 +34,7 @@ Alternatively you can also run the addon locally and use that in Stremio. The ad
 
 You can use one of the precompiled binaries from GitHub:
 
-1. Download the binary for your OS from <https://github.com/doingodswork/stremio-top-movies/releases>
+1. Download the binary for your OS from <https://github.com/Deflix-tv/stremio-top-movies/releases>
 2. Simply run the executable binary
 3. To stop the program press `Ctrl-C` (or `⌃-C` on macOS)
 
